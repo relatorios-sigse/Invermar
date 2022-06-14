@@ -9,8 +9,34 @@ SELECT
             Panel de análisis:  REPAUD - Reporte de Auditorías
             
             Modificaciones: 
-            DD-MM-AAAA. Autor. Descripción
+            14-06-2022. Andrés Del Río. Inclusión de número de requisitos
 **/
+
+		( SELECT
+            MAX(TMP.TOTAL)       
+        FROM
+            (SELECT
+                DISTINCT    AUAUDIT.IDAUDIT,
+                AUAUDIT.NMAUDIT,
+                AUCONFORMITYLEVEL.IDCONFORMITYLEVEL,
+                COUNT(AUCONFORMITYLEVEL.IDCONFORMITYLEVEL) OVER()  TOTAL                     
+            FROM
+                AUAUDIT                      
+            JOIN
+                AUSCOPESTRUCT                                   
+                    ON AUSCOPESTRUCT.CDSCOPEDEFINITION=AUAUDIT.CDSCOPEDEFINITION                                                                                         
+            JOIN
+                AUCONFORMITYLEVEL                                                                                                                                      
+                    ON (
+                        AUSCOPESTRUCT.CDAUDITEVALCRIT=AUCONFORMITYLEVEL.CDAUDITEVALCRIT                                                                                                                                                          
+                        AND AUSCOPESTRUCT.CDAUDITEVALCRITREV=AUCONFORMITYLEVEL.CDAUDITEVALCRITREV                                                                                                                                                          
+                        AND AUSCOPESTRUCT.CDCONFORMITYLEVEL=AUCONFORMITYLEVEL.CDCONFORMITYLEVEL                                                                                                                                     
+                    )                                                                                           
+            WHERE
+                AUAUDIT.CDAUDIT = AU.CDAUDIT )  TMP         
+        ) TOTAL_REQUISITOS,
+
+
         ( SELECT
             ROUND(100.0 * TMP.TOTAL_PARTITION / TMP.TOTAL,
             2 )       
@@ -753,6 +779,7 @@ SELECT
                                                                         )                                                                  
                                                                     UNION
                                                                     ALL SELECT
+                                                                    	NULL AS TOTAL_REQUISITOS,
                                                                         NULL AS PORC_CUMPLE,
                                                                         NULL AS LISTADO_REQUISITOS,
                                                                         NULL AS CDPLANEXECMODEL,
